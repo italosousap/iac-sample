@@ -1,0 +1,53 @@
+---
+Parameters:
+  SSHKey:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Key name
+
+Mappings:
+  AMIs:
+    us-east-1:
+      amazon: ami-05fa00d4c63e32376
+      ubuntu20: ami-08d4ac5b634553e16
+      ubuntu22: ami-052efd3df9dad4825
+      redhat: ami-06640050dc3f556bb
+    us-west-1:
+      amazon: ami-018d291ca9ffc002f
+      ubuntu20: ami-01154c8b2e9a14885
+      ubuntu22: ami-085284d24fe829cd0
+      redhat: ami-0186e3fec9b0283ee
+
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      KeyName: !Ref SSHKey
+      ImageId: !FindInMap [AMIs, !Ref "AWS::Region", ubuntu20]
+      InstanceType: t2.micro
+      Monitoring: false
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      UserData: !Base64 |
+        #!/bin/bash -ex
+        apt update -y
+        apt install httpd
+        systemctl start httpd
+        systemctl enable httpd
+        echo "Eai beleza" > /var/www/html/index.html
+      Tags:
+        - Key: Name
+          Value: Sunday
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: HTTP and SSH
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
