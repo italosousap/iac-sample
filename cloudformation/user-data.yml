@@ -22,15 +22,15 @@ Resources:
     Type: AWS::EC2::Instance
     Properties:
       KeyName: !Ref SSHKey
-      ImageId: !FindInMap [AMIs, !Ref "AWS::Region", ubuntu20]
+      ImageId: !FindInMap [AMIs, !Ref "AWS::Region", amazon]
       InstanceType: t2.micro
       Monitoring: false
       SecurityGroupIds:
         - !Ref SecurityGroup
       UserData: !Base64 |
         #!/bin/bash -ex
-        apt update -y
-        apt install httpd
+        yum update -y
+        yum install -y httpd
         systemctl start httpd
         systemctl enable httpd
         echo "Eai beleza" > /var/www/html/index.html
